@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Game Cờ Tướng</title>
+<style>
+  body { margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; background: transparent; }
+  .tuta-game-wrapper { display: flex; flex-wrap: wrap; gap: 20px; background-color: #1b1b1e; padding: 15px; border-radius: 12px; max-width: 700px; margin: 0 auto; color: #e2e2e2; box-sizing: border-box; }
+  .tuta-board-section { flex: 1 1 300px; display: flex; justify-content: center; }
+  .xiangqi-board { width: 100%; aspect-ratio: 9 / 10; background-color: #dcb37b; border: 3px solid #5a3c1c; position: relative; border-radius: 4px; }
+  .xiangqi-board::before { content: ""; position: absolute; top: 5%; bottom: 5%; left: 5.55%; right: 5.55%; background-image: linear-gradient(#5a3c1c 1px, transparent 1px), linear-gradient(90deg, #5a3c1c 1px, transparent 1px); background-size: 12.5% 11.11%; }
+  .xiangqi-board::after { content: "SỞ HÀ                      HÁN GIỚI"; position: absolute; top: 45%; left: 5.55%; right: 5.55%; height: 10%; background-color: #dcb37b; border-top: 1px solid #5a3c1c; border-bottom: 1px solid #5a3c1c; display: flex; align-items: center; justify-content: center; color: #5a3c1c; font-weight: bold; font-size: 1.2rem; letter-spacing: 2px; }
+  .piece { position: absolute; width: 10.5%; height: 9.5%; background-color: #f0d5a3; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-family: 'KaiTi', 'Times New Roman', serif; font-size: 1.5rem; font-weight: bold; box-shadow: 2px 2px 4px rgba(0,0,0,0.5), inset 1px 1px 2px rgba(255,255,255,0.8); transform: translate(-50%, -50%); cursor: pointer; z-index: 10; }
+  .piece.red { color: #c62828; border: 2px solid #c62828; }
+  .piece.black { color: #111; border: 2px solid #111; }
+  .tuta-control-section { flex: 1 1 250px; display: flex; flex-direction: column; gap: 12px; }
+  .player-card { display: flex; align-items: center; gap: 15px; background: #25262c; padding: 10px 15px; border-radius: 8px; border: 1px solid #33343c; }
+  .avatar { width: 40px; height: 40px; border-radius: 6px; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; }
+  .player-info { flex: 1; display: flex; flex-direction: column; }
+  .player-name { font-weight: 600; font-size: 1rem; color: #fff; }
+  .player-title { font-size: 0.8rem; color: #888; }
+  select.difficulty-select { background: #1b1b1e; color: #fff; border: 1px solid #444; padding: 5px; border-radius: 4px; }
+  .status-box { background: #25262c; border: 1px solid #33343c; text-align: center; padding: 12px; border-radius: 8px; color: #e28743; font-weight: bold; }
+  .pgn-box { background: #25262c; border: 1px solid #33343c; border-radius: 8px; padding: 15px; flex-grow: 1; min-height: 80px; font-size: 0.9rem; color: #aaa; overflow-y: auto; }
+  .action-buttons { display: flex; gap: 10px; }
+  .btn-action, .btn-new-game { flex: 1; border: 1px solid #33343c; padding: 10px; border-radius: 6px; cursor: pointer; font-weight: bold; display: flex; justify-content: center; align-items: center; gap: 5px; }
+  .btn-action { background: #25262c; color: #aaa; }
+  .btn-action:hover { background: #33343c; color: #fff; }
+  .btn-resign { flex: 0 0 40px; color: #b54949; }
+  .btn-new-game { background: #2d5038; color: #4bd879; border-color: #366645; }
+</style>
+</head>
+<body>
+<div class="tuta-game-wrapper">
+  <div class="tuta-board-section">
+    <div id="xiangqiboard" class="xiangqi-board"></div>
+  </div>
+  <div class="tuta-control-section">
+    <div class="player-card">
+      <div class="avatar" style="background:#e28743;">🤖</div>
+      <div class="player-info"><span class="player-name">Tuấn Anh (Bot)</span></div>
+      <select class="difficulty-select">
+        <option value="easy">Nghiệp dư</option>
+        <option value="medium" selected>Bán chuyên</option>
+        <option value="hard">Chuyên nghiệp</option>
+      </select>
+    </div>
+    <div class="status-box" id="game-status">Lượt: Bạn (Quân Đỏ)</div>
+    <div class="pgn-box">
+      <div style="margin-bottom: 5px; color: #fff;">Kỳ phổ (PGN):</div>
+      <div id="move-history">Đang chờ ván cờ bắt đầu...</div>
+    </div>
+    <div class="action-buttons">
+      <button class="btn-action"><span>⟲</span> Đi lại</button>
+      <button class="btn-action btn-resign" title="Đầu hàng"><span>⚑</span></button>
+    </div>
+    <button class="btn-new-game"><span>▶</span> Ván Mới</button>
+    <div class="player-card">
+      <div class="avatar" style="background:#444;">👤</div>
+      <div class="player-info"><span class="player-name">Bạn</span><span class="player-title">Người chơi</span></div>
+    </div>
+  </div>
+</div>
+<script>
+  const board = document.getElementById('xiangqiboard');
+  const initialPieces = [
+    { id: 'b_che1', type: '車', color: 'black', x: 0, y: 0 }, { id: 'b_ma1', type: '馬', color: 'black', x: 1, y: 0 },
+    { id: 'b_tuong1', type: '象', color: 'black', x: 2, y: 0 }, { id: 'b_si1', type: '士', color: 'black', x: 3, y: 0 },
+    { id: 'b_king', type: '將', color: 'black', x: 4, y: 0 }, { id: 'b_si2', type: '士', color: 'black', x: 5, y: 0 },
+    { id: 'b_tuong2', type: '象', color: 'black', x: 6, y: 0 }, { id: 'b_ma2', type: '馬', color: 'black', x: 7, y: 0 },
+    { id: 'b_che2', type: '車', color: 'black', x: 8, y: 0 },
+    { id: 'b_phao1', type: '砲', color: 'black', x: 1, y: 2 }, { id: 'b_phao2', type: '砲', color: 'black', x: 7, y: 2 },
+    { id: 'b_tot1', type: '卒', color: 'black', x: 0, y: 3 }, { id: 'b_tot2', type: '卒', color: 'black', x: 2, y: 3 },
+    { id: 'b_tot3', type: '卒', color: 'black', x: 4, y: 3 }, { id: 'b_tot4', type: '卒', color: 'black', x: 6, y: 3 },
+    { id: 'b_tot5', type: '卒', color: 'black', x: 8, y: 3 },
+    { id: 'r_tot1', type: '兵', color: 'red', x: 0, y: 6 }, { id: 'r_tot2', type: '兵', color: 'red', x: 2, y: 6 },
+    { id: 'r_tot3', type: '兵', color: 'red', x: 4, y: 6 }, { id: 'r_tot4', type: '兵', color: 'red', x: 6, y: 6 },
+    { id: 'r_tot5', type: '兵', color: 'red', x: 8, y: 6 },
+    { id: 'r_phao1', type: '炮', color: 'red', x: 1, y: 7 }, { id: 'r_phao2', type: '炮', color: 'red', x: 7, y: 7 },
+    { id: 'r_che1', type: '俥', color: 'red', x: 0, y: 9 }, { id: 'r_ma1', type: '傌', color: 'red', x: 1, y: 9 },
+    { id: 'r_tuong1', type: '相', color: 'red', x: 2, y: 9 }, { id: 'r_si1', type: '仕', color: 'red', x: 3, y: 9 },
+    { id: 'r_king', type: '帥', color: 'red', x: 4, y: 9 }, { id: 'r_si2', type: '仕', color: 'red', x: 5, y: 9 },
+    { id: 'r_tuong2', type: '相', color: 'red', x: 6, y: 9 }, { id: 'r_ma2', type: '傌', color: 'red', x: 7, y: 9 },
+    { id: 'r_che2', type: '俥', color: 'red', x: 8, y: 9 }
+  ];
+  initialPieces.forEach(p => {
+    const pieceDiv = document.createElement('div');
+    pieceDiv.className = `piece ${p.color}`;
+    pieceDiv.innerText = p.type;
+    const leftPercent = 5.55 + (p.x * (88.9 / 8));
+    const topPercent = 5 + (p.y * (90 / 9));
+    pieceDiv.style.left = `${leftPercent}%`;
+    pieceDiv.style.top = `${topPercent}%`;
+    // Click thử vào quân cờ để xem hiệu ứng
+    pieceDiv.addEventListener('click', () => {
+      alert(`Bạn vừa chọn quân ${p.type} ${p.color === 'red' ? 'Đỏ' : 'Đen'}`);
+    });
+    board.appendChild(pieceDiv);
+  });
+</script>
+</body>
+</html>
