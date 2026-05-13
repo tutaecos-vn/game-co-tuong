@@ -12,33 +12,20 @@
   /* --- BÀN CỜ --- */
   .tuta-board-section { flex: 1 1 320px; display: flex; justify-content: center; position: relative; user-select: none; }
   .xiangqi-board { width: 100%; max-width: 400px; aspect-ratio: 9 / 10; background-color: #dcb37b; border: 3px solid #5a3c1c; position: relative; border-radius: 6px; overflow: hidden; box-shadow: inset 0 0 10px rgba(0,0,0,0.3); }
-  
-  /* LƯỚI CARO VÀ CỬU CUNG (ĐÃ SỬA CHUẨN XÁC) */
   .xiangqi-board::before { 
     content: ""; position: absolute; top: 5%; bottom: 5%; left: 5.55%; right: 5.55%; 
     border-right: 1px solid #5a3c1c; border-bottom: 1px solid #5a3c1c; box-sizing: border-box;
     background-image: 
-      /* Đường chéo Cung Tướng trên */
       linear-gradient(to bottom right, transparent calc(50% - 0.7px), #5a3c1c calc(50% - 0.7px), #5a3c1c calc(50% + 0.7px), transparent calc(50% + 0.7px)),
       linear-gradient(to top right, transparent calc(50% - 0.7px), #5a3c1c calc(50% - 0.7px), #5a3c1c calc(50% + 0.7px), transparent calc(50% + 0.7px)),
-      /* Đường chéo Cung Tướng dưới */
       linear-gradient(to bottom right, transparent calc(50% - 0.7px), #5a3c1c calc(50% - 0.7px), #5a3c1c calc(50% + 0.7px), transparent calc(50% + 0.7px)),
       linear-gradient(to top right, transparent calc(50% - 0.7px), #5a3c1c calc(50% - 0.7px), #5a3c1c calc(50% + 0.7px), transparent calc(50% + 0.7px)),
-      /* Lưới dọc ngang */
       linear-gradient(#5a3c1c 1px, transparent 1px),
       linear-gradient(90deg, #5a3c1c 1px, transparent 1px);
-    background-size: 
-      25% 22.222%, 25% 22.222%, 
-      25% 22.222%, 25% 22.222%, 
-      12.5% 11.111%, 12.5% 11.111%;
-    background-position: 
-      50% 0%, 50% 0%, 
-      50% 100%, 50% 100%, 
-      0 0, 0 0;
+    background-size: 25% 22.222%, 25% 22.222%, 25% 22.222%, 25% 22.222%, 12.5% 11.111%, 12.5% 11.111%;
+    background-position: 50% 0%, 50% 0%, 50% 100%, 50% 100%, 0 0, 0 0;
     background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, repeat, repeat;
   }
-  
-  /* Sông (Sở Hà Hán Giới) */
   .xiangqi-board::after { content: "SỞ HÀ                      HÁN GIỚI"; position: absolute; top: 45%; left: 5.55%; right: 5.55%; height: 10%; background-color: #dcb37b; border-top: 1px solid #5a3c1c; border-bottom: 1px solid #5a3c1c; display: flex; align-items: center; justify-content: center; color: #5a3c1c; font-weight: bold; font-size: 1.3rem; letter-spacing: 2px; }
   .grid-cell { position: absolute; width: 11.11%; height: 10%; transform: translate(-50%, -50%); cursor: pointer; z-index: 5; }
 
@@ -48,7 +35,7 @@
   .piece.black { color: #111; border: 2px solid #111; }
   .piece.selected { box-shadow: 0 0 12px 4px #4bd879, inset 0 0 5px rgba(255,255,255,0.8); border: 2px solid #4bd879; z-index: 11; transform: translate(-50%, -50%) scale(1.05); }
   
-  /* --- GỢI Ý NƯỚC ĐI --- */
+  /* --- GỢI Ý --- */
   .valid-move-hint { position: absolute; width: 4%; aspect-ratio: 1; background-color: #4bd879; border-radius: 50%; transform: translate(-50%, -50%); z-index: 8; pointer-events: none; box-shadow: 0 2px 4px rgba(0,0,0,0.4); }
   .capture-hint { position: absolute; width: 11%; aspect-ratio: 1; background-color: rgba(216, 75, 75, 0.3); border-radius: 50%; border: 3px solid #d84b4b; transform: translate(-50%, -50%); z-index: 9; pointer-events: none; box-sizing: border-box; }
 
@@ -82,20 +69,19 @@
 </head>
 <body>
 <div class="tuta-game-wrapper">
-  <!-- CỘT BÀN CỜ -->
   <div class="tuta-board-section">
     <div id="xiangqiboard" class="xiangqi-board"></div>
   </div>
   
-  <!-- CỘT ĐIỀU KHIỂN -->
   <div class="tuta-control-section">
     <div class="player-card">
       <div class="avatar" style="background:#e28743; color:#111;">🤖</div>
       <div class="player-info"><span class="player-name">Tuấn Anh (Bot)</span></div>
+      <!-- BẢNG CHỌN ĐỘ KHÓ -->
       <select class="difficulty-select" id="difficulty">
         <option value="easy">Nghiệp dư</option>
-        <option value="medium" selected>Bán chuyên</option>
-        <option value="hard">Chuyên nghiệp</option>
+        <option value="medium">Bán chuyên</option>
+        <option value="hard" selected>Chuyên nghiệp</option> <!-- Đặt mặc định là khó nhất -->
       </select>
     </div>
     
@@ -132,6 +118,7 @@
   let gameHistory = []; 
   let botTimeoutId = null;
 
+  // Thang điểm đánh giá độ quan trọng của các quân cờ
   const pieceValues = {
     '將': 10000, '帥': 10000, '車': 900, '俥': 900, '砲': 450, '炮': 450,
     '馬': 400, '傌': 400, '象': 200, '相': 200, '士': 200, '仕': 200, '卒': 100, '兵': 100
@@ -188,24 +175,17 @@
 
   function undoMove() {
     if (gameHistory.length <= 1) return; 
-
     clearTimeout(botTimeoutId); 
-
     if (currentTurn === 'red') {
       gameHistory.pop(); gameHistory.pop();
     } else {
       gameHistory.pop();
     }
-
     let state = gameHistory[gameHistory.length - 1];
     pieces = JSON.parse(JSON.stringify(state.pieces));
-    currentTurn = state.turn;
-    moveCount = state.moveCount;
-    historyEl.innerHTML = state.pgnHTML;
-    
+    currentTurn = state.turn; moveCount = state.moveCount; historyEl.innerHTML = state.pgnHTML;
     selectedPiece = null; currentValidMoves = []; clearHints();
     statusEl.innerText = 'Lượt: Bạn (Quân Đỏ)'; statusEl.className = 'status-box red-turn';
-    
     document.querySelectorAll('.piece').forEach(e => e.remove());
     pieces.forEach(p => drawPiece(p));
   }
@@ -357,11 +337,13 @@
     }
   }
 
+  // --- NÂNG CẤP AI THÔNG MINH HƠN (MINIMAX) ---
   function botPlay() {
     let difficulty = document.getElementById('difficulty').value;
     let blackPieces = pieces.filter(p => p.color === 'black' && !p.captured);
     let allValidMoves = [];
     
+    // Thu thập toàn bộ nước đi của phe Đen
     blackPieces.forEach(bp => {
       let moves = getValidMoves(bp);
       moves.forEach(m => allValidMoves.push({piece: bp, move: m}));
@@ -370,12 +352,15 @@
     if(allValidMoves.length === 0) return; 
     let chosenMove = null;
 
+    // Xáo trộn để Bot đi đa dạng hơn
     allValidMoves.sort(() => 0.5 - Math.random());
 
     if (difficulty === 'easy') {
+      // Nhắm mắt đi bừa
       chosenMove = allValidMoves[0];
     } 
     else if (difficulty === 'medium') {
+      // Tham ăn nhưng thiển cận (Nhìn 1 bước)
       let captures = allValidMoves.filter(m => m.move.target);
       if(captures.length > 0) {
         captures.sort((a, b) => pieceValues[b.move.target.type] - pieceValues[a.move.target.type]);
@@ -385,24 +370,54 @@
       }
     } 
     else if (difficulty === 'hard') {
+      // CHUYÊN NGHIỆP: Áp dụng Minimax (Nhìn xa 2 bước để chặn tự sát)
       let bestScore = -Infinity;
       
       for(let m of allValidMoves) {
-        let score = 0;
+        let bp = m.piece;
+        let target = m.move.target;
         
-        if (m.piece.type === '卒') {
-          score += (m.move.y > m.piece.y) ? 20 : 0; 
-          score += (m.move.x >= 3 && m.move.x <= 5) ? 10 : 0; 
-        }
+        // --- BƯỚC 1: BOT ĐI THỬ ---
+        let origX = bp.x, origY = bp.y;
+        bp.x = m.move.x; bp.y = m.move.y;
+        if(target) target.captured = true;
+
+        // Tính lợi ích đạt được ở bước này
+        let currentMoveScore = target ? pieceValues[target.type] : 0;
         
-        if (m.move.x === 4) score += 5;
+        // Thưởng vị trí (ép Tốt qua sông, chiếm trung lộ)
+        if (bp.type === '卒') {
+          if (bp.y > origY) currentMoveScore += 15;
+          if (bp.x >= 3 && bp.x <= 5) currentMoveScore += 10;
+        }
+        if (bp.x === 4) currentMoveScore += 5;
 
-        if (m.move.target) {
-          score += pieceValues[m.move.target.type];
+        // --- BƯỚC 2: MÔ PHỎNG NGƯỜI CHƠI ĐÁP TRẢ (TÌM NƯỚC ĐAU NHẤT) ---
+        let maxRedRetaliation = 0;
+        let redPieces = pieces.filter(p => p.color === 'red' && !p.captured);
+        
+        for(let rp of redPieces) {
+          let redMoves = getValidMoves(rp);
+          for(let rm of redMoves) {
+            if(rm.target) {
+              // Nếu người chơi có thể ăn lại quân của Bot
+              let loss = pieceValues[rm.target.type];
+              if(loss > maxRedRetaliation) {
+                maxRedRetaliation = loss;
+              }
+            }
+          }
         }
 
-        if(score > bestScore) {
-          bestScore = score;
+        // --- BƯỚC 3: HOÀN TÁC TRẠNG THÁI ---
+        bp.x = origX; bp.y = origY;
+        if(target) target.captured = false;
+
+        // TÍNH ĐIỂM THỰC SỰ = LỢI ÍCH - THIỆT HẠI
+        let netScore = currentMoveScore - maxRedRetaliation;
+
+        if(netScore > bestScore) {
+          bestScore = netScore;
           chosenMove = m;
         }
       }
