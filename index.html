@@ -5,63 +5,103 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Game Cờ Tướng TuTaEcos</title>
 <style>
+  /* --- GIAO DIỆN TỔNG THỂ --- */
   body { margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, sans-serif; background: transparent; }
-  .tuta-game-wrapper { display: flex; flex-wrap: wrap; gap: 20px; background-color: #1b1b1e; padding: 15px; border-radius: 12px; max-width: 700px; margin: 0 auto; color: #e2e2e2; box-sizing: border-box; }
-  .tuta-board-section { flex: 1 1 300px; display: flex; justify-content: center; position: relative; user-select: none; }
-  .xiangqi-board { width: 100%; aspect-ratio: 9 / 10; background-color: #dcb37b; border: 3px solid #5a3c1c; position: relative; border-radius: 4px; overflow: hidden; }
-  .xiangqi-board::before { content: ""; position: absolute; top: 5%; bottom: 5%; left: 5.55%; right: 5.55%; background-image: linear-gradient(#5a3c1c 1px, transparent 1px), linear-gradient(90deg, #5a3c1c 1px, transparent 1px); background-size: 12.5% 11.11%; }
-  .xiangqi-board::after { content: "SỞ HÀ                      HÁN GIỚI"; position: absolute; top: 45%; left: 5.55%; right: 5.55%; height: 10%; background-color: #dcb37b; border-top: 1px solid #5a3c1c; border-bottom: 1px solid #5a3c1c; display: flex; align-items: center; justify-content: center; color: #5a3c1c; font-weight: bold; font-size: 1.2rem; letter-spacing: 2px; }
+  .tuta-game-wrapper { display: flex; flex-wrap: wrap; gap: 20px; background-color: #1b1b1e; padding: 15px; border-radius: 12px; max-width: 750px; margin: 0 auto; color: #e2e2e2; box-sizing: border-box; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
   
+  /* --- BÀN CỜ --- */
+  .tuta-board-section { flex: 1 1 320px; display: flex; justify-content: center; position: relative; user-select: none; }
+  .xiangqi-board { width: 100%; max-width: 400px; aspect-ratio: 9 / 10; background-color: #dcb37b; border: 3px solid #5a3c1c; position: relative; border-radius: 6px; overflow: hidden; box-shadow: inset 0 0 10px rgba(0,0,0,0.3); }
+  .xiangqi-board::before { content: ""; position: absolute; top: 5%; bottom: 5%; left: 5.55%; right: 5.55%; background-image: linear-gradient(#5a3c1c 1px, transparent 1px), linear-gradient(90deg, #5a3c1c 1px, transparent 1px); background-size: 12.5% 11.11%; }
+  .xiangqi-board::after { content: "SỞ HÀ                      HÁN GIỚI"; position: absolute; top: 45%; left: 5.55%; right: 5.55%; height: 10%; background-color: #dcb37b; border-top: 1px solid #5a3c1c; border-bottom: 1px solid #5a3c1c; display: flex; align-items: center; justify-content: center; color: #5a3c1c; font-weight: bold; font-size: 1.3rem; letter-spacing: 2px; }
   .grid-cell { position: absolute; width: 11.11%; height: 10%; transform: translate(-50%, -50%); cursor: pointer; z-index: 5; }
-  .piece { position: absolute; width: 10.5%; height: 9.5%; background-color: #f0d5a3; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-family: 'KaiTi', 'Times New Roman', serif; font-size: 1.5rem; font-weight: bold; box-shadow: 2px 2px 4px rgba(0,0,0,0.5), inset 1px 1px 2px rgba(255,255,255,0.8); transform: translate(-50%, -50%); cursor: pointer; z-index: 10; transition: left 0.2s ease, top 0.2s ease; }
+
+  /* --- QUÂN CỜ --- */
+  .piece { position: absolute; width: 10.5%; height: 9.5%; background-color: #f0d5a3; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-family: 'KaiTi', 'Times New Roman', serif; font-size: 1.6rem; font-weight: bold; box-shadow: 2px 2px 5px rgba(0,0,0,0.6), inset 1px 1px 2px rgba(255,255,255,0.8); transform: translate(-50%, -50%); cursor: pointer; z-index: 10; transition: left 0.25s ease-out, top 0.25s ease-out, box-shadow 0.2s; }
   .piece.red { color: #c62828; border: 2px solid #c62828; }
   .piece.black { color: #111; border: 2px solid #111; }
-  .piece.selected { box-shadow: 0 0 15px 4px #4bd879; border: 2px solid #4bd879; z-index: 11; }
+  .piece.selected { box-shadow: 0 0 12px 4px #4bd879, inset 0 0 5px rgba(255,255,255,0.8); border: 2px solid #4bd879; z-index: 11; transform: translate(-50%, -50%) scale(1.05); }
   
-  /* CHẤM XANH GỢI Ý NƯỚC ĐI */
-  .valid-move-hint { position: absolute; width: 25%; height: 25%; background-color: rgba(75, 216, 121, 0.7); border-radius: 50%; transform: translate(-50%, -50%); z-index: 8; pointer-events: none; box-shadow: 0 0 5px rgba(0,0,0,0.5); }
-  .capture-hint { position: absolute; width: 11%; height: 10%; background-color: rgba(216, 75, 75, 0.4); transform: translate(-50%, -50%); z-index: 9; pointer-events: none; border-radius: 5px; }
+  /* --- GỢI Ý NƯỚC ĐI --- */
+  .valid-move-hint { position: absolute; width: 4%; aspect-ratio: 1; background-color: #4bd879; border-radius: 50%; transform: translate(-50%, -50%); z-index: 8; pointer-events: none; box-shadow: 0 2px 4px rgba(0,0,0,0.4); }
+  .capture-hint { position: absolute; width: 11%; aspect-ratio: 1; background-color: rgba(216, 75, 75, 0.3); border-radius: 50%; border: 3px solid #d84b4b; transform: translate(-50%, -50%); z-index: 9; pointer-events: none; box-sizing: border-box; }
 
+  /* --- BẢNG ĐIỀU KHIỂN --- */
   .tuta-control-section { flex: 1 1 250px; display: flex; flex-direction: column; gap: 12px; }
   .player-card { display: flex; align-items: center; gap: 15px; background: #25262c; padding: 10px 15px; border-radius: 8px; border: 1px solid #33343c; }
   .avatar { width: 40px; height: 40px; border-radius: 6px; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; }
   .player-info { flex: 1; display: flex; flex-direction: column; }
   .player-name { font-weight: 600; font-size: 1rem; color: #fff; }
   .player-title { font-size: 0.8rem; color: #888; }
-  select.difficulty-select { background: #1b1b1e; color: #fff; border: 1px solid #444; padding: 5px; border-radius: 4px; outline: none; }
-  .status-box { background: #25262c; border: 1px solid #33343c; text-align: center; padding: 12px; border-radius: 8px; font-weight: bold; transition: 0.3s; }
-  .status-box.red-turn { color: #e28743; }
+  select.difficulty-select { background: #1b1b1e; color: #fff; border: 1px solid #444; padding: 6px; border-radius: 4px; outline: none; cursor: pointer; }
+  .status-box { background: #25262c; border: 1px solid #33343c; text-align: center; padding: 12px; border-radius: 8px; font-weight: bold; font-size: 1.1rem; transition: 0.3s; }
+  .status-box.red-turn { color: #e28743; border-color: #e28743; }
   .status-box.black-turn { color: #aaa; }
-  .pgn-box { background: #25262c; border: 1px solid #33343c; border-radius: 8px; padding: 10px 15px; flex-grow: 1; min-height: 80px; max-height: 120px; font-size: 0.9rem; color: #aaa; overflow-y: auto; line-height: 1.6; }
+  
+  /* ĐÃ SỬA: Cố định cứng chiều cao Khung Kỳ Phổ */
+  .pgn-box { 
+    background: #25262c; border: 1px solid #33343c; border-radius: 8px; padding: 12px; 
+    height: 180px; /* Chiều cao cố định */
+    display: flex; flex-direction: column; box-sizing: border-box;
+  }
+  .pgn-header {
+    margin-bottom: 8px; color: #fff; font-weight: bold; border-bottom: 1px solid #444; padding-bottom: 5px; flex-shrink: 0;
+  }
+  #move-history {
+    flex-grow: 1; overflow-y: auto; color: #aaa; font-size: 0.9rem; line-height: 1.6;
+  }
+  /* Tùy chỉnh thanh cuộn đẹp hơn */
+  #move-history::-webkit-scrollbar { width: 6px; }
+  #move-history::-webkit-scrollbar-thumb { background-color: #444; border-radius: 4px; }
+
   .action-buttons { display: flex; gap: 10px; }
-  .btn-action, .btn-new-game { flex: 1; border: 1px solid #33343c; padding: 10px; border-radius: 6px; cursor: pointer; font-weight: bold; display: flex; justify-content: center; align-items: center; gap: 5px; transition: 0.2s; }
+  .btn-action, .btn-new-game { flex: 1; border: 1px solid #33343c; padding: 12px; border-radius: 6px; cursor: pointer; font-weight: bold; display: flex; justify-content: center; align-items: center; gap: 5px; transition: 0.2s; font-size: 0.95rem; }
   .btn-action { background: #25262c; color: #aaa; }
   .btn-action:hover { background: #33343c; color: #fff; }
-  .btn-resign { flex: 0 0 40px; color: #b54949; }
+  .btn-resign { flex: 0 0 50px; color: #b54949; }
+  .btn-resign:hover { background: #b54949; color: #fff; }
   .btn-new-game { background: #2d5038; color: #4bd879; border-color: #366645; }
+  .btn-new-game:hover { background: #366645; color: #fff; }
 </style>
 </head>
 <body>
 <div class="tuta-game-wrapper">
+  <!-- CỘT BÀN CỜ -->
   <div class="tuta-board-section">
     <div id="xiangqiboard" class="xiangqi-board"></div>
   </div>
+  
+  <!-- CỘT ĐIỀU KHIỂN -->
   <div class="tuta-control-section">
+    <!-- Bot -->
     <div class="player-card">
-      <div class="avatar" style="background:#e28743;">🤖</div>
+      <div class="avatar" style="background:#e28743; color:#111;">🤖</div>
       <div class="player-info"><span class="player-name">Tuấn Anh (Bot)</span></div>
-      <select class="difficulty-select" id="difficulty"><option value="easy">Nghiệp dư</option></select>
+      <select class="difficulty-select" id="difficulty">
+        <option value="easy">Nghiệp dư</option>
+        <option value="medium" selected>Bán chuyên</option>
+        <option value="hard">Chuyên nghiệp</option>
+      </select>
     </div>
-    <div class="status-box red-turn" id="game-status">Lượt: Bạn (Đỏ)</div>
-    <div class="pgn-box"><div style="margin-bottom:5px; color:#fff; font-weight:bold;">Kỳ phổ (PGN):</div><div id="move-history"></div></div>
+    
+    <div class="status-box red-turn" id="game-status">Lượt: Bạn (Quân Đỏ)</div>
+    
+    <!-- KHUNG KỲ PHỔ ĐÃ SỬA CỐ ĐỊNH -->
+    <div class="pgn-box">
+      <div class="pgn-header">Kỳ phổ (PGN):</div>
+      <div id="move-history"></div>
+    </div>
+    
     <div class="action-buttons">
-      <button class="btn-action" onclick="alert('Tính năng đang hoàn thiện')"><span>⟲</span> Đi lại</button>
-      <button class="btn-action btn-resign" onclick="resetGame()"><span>⚑</span></button>
+      <!-- Nút Đi Lại đã kích hoạt -->
+      <button class="btn-action" onclick="undoMove()"><span>⟲</span> Đi lại</button>
+      <button class="btn-action btn-resign" onclick="resetGame()" title="Đầu hàng"><span>⚑</span></button>
     </div>
     <button class="btn-new-game" onclick="resetGame()"><span>▶</span> Ván Mới</button>
+    
     <div class="player-card">
       <div class="avatar" style="background:#444;">👤</div>
-      <div class="player-info"><span class="player-name">Bạn</span><span class="player-title">Người chơi</span></div>
+      <div class="player-info"><span class="player-name">Bạn</span><span class="player-title">Cầm quân Đỏ</span></div>
     </div>
   </div>
 </div>
@@ -76,6 +116,15 @@
   let selectedPiece = null;
   let currentValidMoves = [];
   let moveCount = 1;
+  
+  // BIẾN THÊM VÀO ĐỂ XỬ LÝ "ĐI LẠI"
+  let gameHistory = []; 
+  let botTimeoutId = null;
+
+  const pieceValues = {
+    '將': 10000, '帥': 10000, '車': 900, '俥': 900, '砲': 450, '炮': 450,
+    '馬': 400, '傌': 400, '象': 200, '相': 200, '士': 200, '仕': 200, '卒': 100, '兵': 100
+  };
 
   const initialSetup = [
     { id: 'b_che1', type: '車', color: 'black', x: 0, y: 0 }, { id: 'b_ma1', type: '馬', color: 'black', x: 1, y: 0 }, { id: 'b_tuong1', type: '象', color: 'black', x: 2, y: 0 }, { id: 'b_si1', type: '士', color: 'black', x: 3, y: 0 }, { id: 'b_king', type: '將', color: 'black', x: 4, y: 0 }, { id: 'b_si2', type: '士', color: 'black', x: 5, y: 0 }, { id: 'b_tuong2', type: '象', color: 'black', x: 6, y: 0 }, { id: 'b_ma2', type: '馬', color: 'black', x: 7, y: 0 }, { id: 'b_che2', type: '車', color: 'black', x: 8, y: 0 },
@@ -103,6 +152,10 @@
     }
     pieces = JSON.parse(JSON.stringify(initialSetup));
     pieces.forEach(p => drawPiece(p));
+    
+    // Ghi nhận trạng thái lúc khởi tạo (dành cho nút Đi Lại)
+    gameHistory = [];
+    saveState();
   }
 
   function drawPiece(p) {
@@ -114,7 +167,50 @@
     boardEl.appendChild(div);
   }
 
-  // TÍNH TOÁN LUẬT ĐI (VALID MOVES)
+  // LƯU TRẠNG THÁI BÀN CỜ
+  function saveState() {
+    gameHistory.push({
+      pieces: JSON.parse(JSON.stringify(pieces)),
+      turn: currentTurn,
+      moveCount: moveCount,
+      pgnHTML: historyEl.innerHTML
+    });
+  }
+
+  // TÍNH NĂNG ĐI LẠI (UNDO)
+  function undoMove() {
+    if (gameHistory.length <= 1) return; // Mới vào game, chưa đi gì thì không Undo được
+
+    clearTimeout(botTimeoutId); // Hủy lệnh đánh của Bot nếu nó đang nghĩ
+
+    if (currentTurn === 'red') {
+      // Đã qua lượt Bot, phải lùi 2 bước (Lùi lệnh Bot đi, Lùi tiếp lệnh Mình đi)
+      gameHistory.pop();
+      gameHistory.pop();
+    } else {
+      // Đang là lượt Bot nghĩ chưa kịp đánh, lùi 1 bước (Lùi lệnh Mình vừa đi)
+      gameHistory.pop();
+    }
+
+    // Tải lại dữ liệu của bước trước đó
+    let state = gameHistory[gameHistory.length - 1];
+    pieces = JSON.parse(JSON.stringify(state.pieces));
+    currentTurn = state.turn;
+    moveCount = state.moveCount;
+    historyEl.innerHTML = state.pgnHTML;
+    
+    // Dọn dẹp hiệu ứng UI
+    selectedPiece = null;
+    currentValidMoves = [];
+    clearHints();
+    statusEl.innerText = 'Lượt: Bạn (Quân Đỏ)';
+    statusEl.className = 'status-box red-turn';
+    
+    // Xóa quân cờ cũ và vẽ lại quân cờ mới
+    document.querySelectorAll('.piece').forEach(e => e.remove());
+    pieces.forEach(p => drawPiece(p));
+  }
+
   function getValidMoves(piece) {
     let moves = [];
     let {x, y, type, color} = piece;
@@ -128,19 +224,16 @@
       return !target; 
     }
 
-    // Tốt
     if(type === '兵' || type === '卒') {
-      addIfValid(x, y + dy);
+      addIfValid(x, y + dy); 
       if((isRed && y <= 4) || (!isRed && y >= 5)) { addIfValid(x + 1, y); addIfValid(x - 1, y); }
     }
-    // Xe
     else if(type === '俥' || type === '車') {
       for(let i=x+1; i<=8; i++) if(!addIfValid(i, y)) break;
       for(let i=x-1; i>=0; i--) if(!addIfValid(i, y)) break;
       for(let i=y+1; i<=9; i++) if(!addIfValid(x, i)) break;
       for(let i=y-1; i>=0; i--) if(!addIfValid(x, i)) break;
     }
-    // Pháo
     else if(type === '炮' || type === '砲') {
       let dirs = [[1,0],[-1,0],[0,1],[0,-1]];
       for(let d of dirs) {
@@ -152,33 +245,29 @@
           if(!jump) {
             if(!target) moves.push({x: nx, y: ny, target: null}); else jump = true;
           } else if(target) {
-            if(target.color !== color) moves.push({x: nx, y: ny, target: target});
-            break;
+            if(target.color !== color) moves.push({x: nx, y: ny, target: target}); break;
           }
         }
       }
     }
-    // Mã
     else if(type === '傌' || type === '馬') {
       let knightMoves = [[1,2], [2,1], [2,-1], [1,-2], [-1,-2], [-2,-1], [-2,1], [-1,2]];
       for(let m of knightMoves) {
         let nx = x + m[0], ny = y + m[1];
-        let bx = x + (Math.abs(m[0])==2 ? Math.sign(m[0]) : 0);
-        let by = y + (Math.abs(m[1])==2 ? Math.sign(m[1]) : 0);
+        let bx = x + (Math.abs(m[0])==2 ? Math.sign(m[0]) : 0); 
+        let by = y + (Math.abs(m[1])==2 ? Math.sign(m[1]) : 0); 
         if(!getPieceAt(bx, by)) addIfValid(nx, ny);
       }
     }
-    // Tượng
     else if(type === '相' || type === '象') {
       let elephantMoves = [[2,2], [2,-2], [-2,2], [-2,-2]];
       for(let m of elephantMoves) {
         let nx = x + m[0], ny = y + m[1];
-        if((isRed && ny <= 4) || (!isRed && ny >= 5)) continue; // K qua sông
-        let bx = x + m[0]/2, by = y + m[1]/2;
+        if((isRed && ny <= 4) || (!isRed && ny >= 5)) continue; 
+        let bx = x + m[0]/2, by = y + m[1]/2; 
         if(!getPieceAt(bx, by)) addIfValid(nx, ny);
       }
     }
-    // Sĩ
     else if(type === '仕' || type === '士') {
       let advisorMoves = [[1,1], [1,-1], [-1,1], [-1,-1]];
       for(let m of advisorMoves) {
@@ -186,7 +275,6 @@
         if(nx>=3 && nx<=5 && ((isRed && ny>=7) || (!isRed && ny<=2))) addIfValid(nx, ny);
       }
     }
-    // Tướng
     else if(type === '帥' || type === '將') {
       let kingMoves = [[0,1],[0,-1],[1,0],[-1,0]];
       for(let m of kingMoves) {
@@ -197,9 +285,7 @@
     return moves;
   }
 
-  function clearHints() {
-    document.querySelectorAll('.valid-move-hint, .capture-hint').forEach(e => e.remove());
-  }
+  function clearHints() { document.querySelectorAll('.valid-move-hint, .capture-hint').forEach(e => e.remove()); }
 
   function showHints(moves) {
     clearHints();
@@ -213,7 +299,7 @@
   }
 
   function handlePieceClick(clickedPiece) {
-    if (clickedPiece.captured || currentTurn === 'black') return; // Chặn người chơi bấm lúc Bot đi
+    if (clickedPiece.captured || currentTurn === 'black') return;
 
     if (clickedPiece.color === currentTurn) {
       if(selectedPiece) document.getElementById(selectedPiece.id).classList.remove('selected');
@@ -249,56 +335,91 @@
       targetPiece.captured = true;
       document.getElementById(targetPiece.id).style.display = 'none';
       if(targetPiece.type === '將' || targetPiece.type === '帥') {
-        setTimeout(() => alert(`${piece.color === 'red' ? 'Bạn' : 'Bot'} đã Thắng!`), 300);
+        setTimeout(() => alert(`${piece.color === 'red' ? '🎉 BẠN ĐÃ CHIẾN THẮNG!' : '🤖 BOT ĐÃ CHIẾN THẮNG!'}`), 300);
       }
     }
     
     document.getElementById(piece.id).classList.remove('selected');
-    selectedPiece = null;
-    currentValidMoves = [];
+    selectedPiece = null; currentValidMoves = [];
 
+    // Ghi PGN lên màn hình
     let historyLine = document.createElement('div');
     historyLine.innerText = pgn; historyEl.appendChild(historyLine); historyEl.scrollTop = historyEl.scrollHeight;
 
+    // Đổi lượt
     currentTurn = currentTurn === 'red' ? 'black' : 'red';
+    if(currentTurn === 'red') moveCount++; 
+    
+    saveState(); // Chụp ảnh mảng dữ liệu sau mỗi bước
+
     if(currentTurn === 'black') {
-      statusEl.innerText = 'Lượt: Bot (Đang nghĩ...)'; statusEl.className = 'status-box black-turn';
-      setTimeout(botPlay, 600);
+      statusEl.innerText = 'Lượt: Tuấn Anh Bot (Đang nghĩ...)'; statusEl.className = 'status-box black-turn';
+      botTimeoutId = setTimeout(botPlay, 600);
     } else {
-      statusEl.innerText = 'Lượt: Bạn (Đỏ)'; statusEl.className = 'status-box red-turn';
-      moveCount++;
+      statusEl.innerText = 'Lượt: Bạn (Quân Đỏ)'; statusEl.className = 'status-box red-turn';
     }
   }
 
-  // BOT CŨNG PHẢI ĐI ĐÚNG LUẬT
   function botPlay() {
+    let difficulty = document.getElementById('difficulty').value;
     let blackPieces = pieces.filter(p => p.color === 'black' && !p.captured);
     let allValidMoves = [];
     
-    // Thu thập tất cả nước đi hợp lệ của Bot
     blackPieces.forEach(bp => {
       let moves = getValidMoves(bp);
       moves.forEach(m => allValidMoves.push({piece: bp, move: m}));
     });
 
-    if(allValidMoves.length === 0) return;
+    if(allValidMoves.length === 0) return; 
+    let chosenMove = null;
 
-    // Ưu tiên ăn quân
-    let captures = allValidMoves.filter(m => m.move.target !== null);
-    if(captures.length > 0) {
-      let c = captures[Math.floor(Math.random() * captures.length)];
-      executeMove(c.piece, c.move.x, c.move.y, c.move.target);
-      return;
+    allValidMoves.sort(() => 0.5 - Math.random());
+
+    if (difficulty === 'easy') {
+      chosenMove = allValidMoves[0];
+    } 
+    else if (difficulty === 'medium') {
+      let captures = allValidMoves.filter(m => m.move.target !== null);
+      if(captures.length > 0) {
+        captures.sort((a, b) => pieceValues[b.move.target.type] - pieceValues[a.move.target.type]);
+        chosenMove = captures[0];
+      } else {
+        chosenMove = allValidMoves[0];
+      }
+    } 
+    else if (difficulty === 'hard') {
+      let bestScore = -Infinity;
+      
+      for(let m of allValidMoves) {
+        let score = 0;
+        
+        if (m.piece.type === '卒') {
+          score += (m.move.y > m.piece.y) ? 20 : 0; 
+          score += (m.move.x >= 3 && m.move.x <= 5) ? 10 : 0; 
+        }
+        
+        if (m.move.x === 4) score += 5;
+
+        if (m.move.target) {
+          score += pieceValues[m.move.target.type];
+        }
+
+        if(score > bestScore) {
+          bestScore = score;
+          chosenMove = m;
+        }
+      }
     }
 
-    // Nếu không ăn được, đi ngẫu nhiên 1 nước hợp lệ
-    let randomMove = allValidMoves[Math.floor(Math.random() * allValidMoves.length)];
-    executeMove(randomMove.piece, randomMove.move.x, randomMove.move.y, null);
+    if (chosenMove) {
+      executeMove(chosenMove.piece, chosenMove.move.x, chosenMove.move.y, chosenMove.move.target);
+    }
   }
 
   function resetGame() {
+    clearTimeout(botTimeoutId);
     clearHints(); currentTurn = 'red'; selectedPiece = null; currentValidMoves = []; moveCount = 1;
-    historyEl.innerHTML = ''; statusEl.innerText = 'Lượt: Bạn (Đỏ)'; statusEl.className = 'status-box red-turn';
+    historyEl.innerHTML = ''; statusEl.innerText = 'Lượt: Bạn (Quân Đỏ)'; statusEl.className = 'status-box red-turn';
     initBoard();
   }
 
