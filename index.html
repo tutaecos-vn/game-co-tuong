@@ -3,104 +3,63 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Game Cờ Tướng TuTaEcos</title>
+<title>Game Cờ Tướng TuTaEcos Ultra AI</title>
 <style>
-  /* --- GIAO DIỆN TỔNG THỂ --- */
   body { margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, sans-serif; background: transparent; }
   .tuta-game-wrapper { display: flex; flex-wrap: wrap; gap: 20px; background-color: #1b1b1e; padding: 15px; border-radius: 12px; max-width: 750px; margin: 0 auto; color: #e2e2e2; box-sizing: border-box; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-  
-  /* --- BÀN CỜ --- */
   .tuta-board-section { flex: 1 1 320px; display: flex; justify-content: center; position: relative; user-select: none; }
-  .xiangqi-board { width: 100%; max-width: 400px; aspect-ratio: 9 / 10; background-color: #dcb37b; border: 3px solid #5a3c1c; position: relative; border-radius: 6px; overflow: hidden; box-shadow: inset 0 0 10px rgba(0,0,0,0.3); }
+  .xiangqi-board { width: 100%; max-width: 400px; aspect-ratio: 9 / 10; background-color: #dcb37b; border: 3px solid #5a3c1c; position: relative; border-radius: 6px; overflow: hidden; }
   .xiangqi-board::before { 
-    content: ""; position: absolute; top: 5%; bottom: 5%; left: 5.55%; right: 5.55%; 
-    border-right: 1px solid #5a3c1c; border-bottom: 1px solid #5a3c1c; box-sizing: border-box;
+    content: ""; position: absolute; top: 5%; bottom: 5%; left: 5.55%; right: 5.55%; border-right: 1px solid #5a3c1c; border-bottom: 1px solid #5a3c1c; box-sizing: border-box;
     background-image: 
       linear-gradient(to bottom right, transparent calc(50% - 0.7px), #5a3c1c calc(50% - 0.7px), #5a3c1c calc(50% + 0.7px), transparent calc(50% + 0.7px)),
       linear-gradient(to top right, transparent calc(50% - 0.7px), #5a3c1c calc(50% - 0.7px), #5a3c1c calc(50% + 0.7px), transparent calc(50% + 0.7px)),
       linear-gradient(to bottom right, transparent calc(50% - 0.7px), #5a3c1c calc(50% - 0.7px), #5a3c1c calc(50% + 0.7px), transparent calc(50% + 0.7px)),
       linear-gradient(to top right, transparent calc(50% - 0.7px), #5a3c1c calc(50% - 0.7px), #5a3c1c calc(50% + 0.7px), transparent calc(50% + 0.7px)),
-      linear-gradient(#5a3c1c 1px, transparent 1px),
-      linear-gradient(90deg, #5a3c1c 1px, transparent 1px);
+      linear-gradient(#5a3c1c 1px, transparent 1px), linear-gradient(90deg, #5a3c1c 1px, transparent 1px);
     background-size: 25% 22.222%, 25% 22.222%, 25% 22.222%, 25% 22.222%, 12.5% 11.111%, 12.5% 11.111%;
     background-position: 50% 0%, 50% 0%, 50% 100%, 50% 100%, 0 0, 0 0;
     background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, repeat, repeat;
   }
   .xiangqi-board::after { content: "SỞ HÀ                      HÁN GIỚI"; position: absolute; top: 45%; left: 5.55%; right: 5.55%; height: 10%; background-color: #dcb37b; border-top: 1px solid #5a3c1c; border-bottom: 1px solid #5a3c1c; display: flex; align-items: center; justify-content: center; color: #5a3c1c; font-weight: bold; font-size: 1.3rem; letter-spacing: 2px; }
   .grid-cell { position: absolute; width: 11.11%; height: 10%; transform: translate(-50%, -50%); cursor: pointer; z-index: 5; }
-
-  /* --- QUÂN CỜ --- */
-  .piece { position: absolute; width: 10.5%; height: 9.5%; background-color: #f0d5a3; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-family: 'KaiTi', 'Times New Roman', serif; font-size: 1.6rem; font-weight: bold; box-shadow: 2px 2px 5px rgba(0,0,0,0.6), inset 1px 1px 2px rgba(255,255,255,0.8); transform: translate(-50%, -50%); cursor: pointer; z-index: 10; transition: left 0.25s ease-out, top 0.25s ease-out, box-shadow 0.2s; }
+  .piece { position: absolute; width: 10.5%; height: 9.5%; background-color: #f0d5a3; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-family: 'KaiTi', 'Times New Roman', serif; font-size: 1.6rem; font-weight: bold; box-shadow: 2px 2px 5px rgba(0,0,0,0.6); transform: translate(-50%, -50%); cursor: pointer; z-index: 10; transition: left 0.2s, top 0.2s; }
   .piece.red { color: #c62828; border: 2px solid #c62828; }
   .piece.black { color: #111; border: 2px solid #111; }
-  .piece.selected { box-shadow: 0 0 12px 4px #4bd879, inset 0 0 5px rgba(255,255,255,0.8); border: 2px solid #4bd879; z-index: 11; transform: translate(-50%, -50%) scale(1.05); }
-  
-  /* --- GỢI Ý --- */
-  .valid-move-hint { position: absolute; width: 4%; aspect-ratio: 1; background-color: #4bd879; border-radius: 50%; transform: translate(-50%, -50%); z-index: 8; pointer-events: none; box-shadow: 0 2px 4px rgba(0,0,0,0.4); }
-  .capture-hint { position: absolute; width: 11%; aspect-ratio: 1; background-color: rgba(216, 75, 75, 0.3); border-radius: 50%; border: 3px solid #d84b4b; transform: translate(-50%, -50%); z-index: 9; pointer-events: none; box-sizing: border-box; }
-
-  /* --- BẢNG ĐIỀU KHIỂN --- */
+  .piece.selected { box-shadow: 0 0 12px 4px #4bd879; border: 2px solid #4bd879; z-index: 11; }
+  .valid-move-hint { position: absolute; width: 4%; aspect-ratio: 1; background-color: #4bd879; border-radius: 50%; transform: translate(-50%, -50%); z-index: 8; pointer-events: none; }
+  .capture-hint { position: absolute; width: 11%; aspect-ratio: 1; background-color: rgba(216, 75, 75, 0.3); border-radius: 50%; border: 3px solid #d84b4b; transform: translate(-50%, -50%); z-index: 9; pointer-events: none; }
   .tuta-control-section { flex: 1 1 250px; display: flex; flex-direction: column; gap: 12px; }
   .player-card { display: flex; align-items: center; gap: 15px; background: #25262c; padding: 10px 15px; border-radius: 8px; border: 1px solid #33343c; }
   .avatar { width: 40px; height: 40px; border-radius: 6px; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; }
   .player-info { flex: 1; display: flex; flex-direction: column; }
   .player-name { font-weight: 600; font-size: 1rem; color: #fff; }
-  .player-title { font-size: 0.8rem; color: #888; }
-  select.difficulty-select { background: #1b1b1e; color: #fff; border: 1px solid #444; padding: 6px; border-radius: 4px; outline: none; cursor: pointer; }
-  .status-box { background: #25262c; border: 1px solid #33343c; text-align: center; padding: 12px; border-radius: 8px; font-weight: bold; font-size: 1.1rem; transition: 0.3s; }
-  .status-box.red-turn { color: #e28743; border-color: #e28743; }
-  .status-box.black-turn { color: #aaa; }
-  
-  .pgn-box { background: #25262c; border: 1px solid #33343c; border-radius: 8px; padding: 12px; height: 180px; display: flex; flex-direction: column; box-sizing: border-box; }
-  .pgn-header { margin-bottom: 8px; color: #fff; font-weight: bold; border-bottom: 1px solid #444; padding-bottom: 5px; flex-shrink: 0; }
-  #move-history { flex-grow: 1; overflow-y: auto; color: #aaa; font-size: 0.9rem; line-height: 1.6; }
-  #move-history::-webkit-scrollbar { width: 6px; }
-  #move-history::-webkit-scrollbar-thumb { background-color: #444; border-radius: 4px; }
-
+  select.difficulty-select { background: #1b1b1e; color: #fff; border: 1px solid #444; padding: 6px; border-radius: 4px; outline: none; }
+  .status-box { background: #25262c; border: 1px solid #33343c; text-align: center; padding: 12px; border-radius: 8px; font-weight: bold; }
+  .pgn-box { background: #25262c; border: 1px solid #33343c; border-radius: 8px; padding: 12px; height: 180px; display: flex; flex-direction: column; }
+  #move-history { flex-grow: 1; overflow-y: auto; color: #aaa; font-size: 0.9rem; }
   .action-buttons { display: flex; gap: 10px; }
-  .btn-action, .btn-new-game { flex: 1; border: 1px solid #33343c; padding: 12px; border-radius: 6px; cursor: pointer; font-weight: bold; display: flex; justify-content: center; align-items: center; gap: 5px; transition: 0.2s; font-size: 0.95rem; }
-  .btn-action { background: #25262c; color: #aaa; }
-  .btn-action:hover { background: #33343c; color: #fff; }
-  .btn-resign { flex: 0 0 50px; color: #b54949; }
-  .btn-resign:hover { background: #b54949; color: #fff; }
-  .btn-new-game { background: #2d5038; color: #4bd879; border-color: #366645; }
-  .btn-new-game:hover { background: #366645; color: #fff; }
+  .btn-action, .btn-new-game { flex: 1; border: 1px solid #33343c; padding: 12px; border-radius: 6px; cursor: pointer; font-weight: bold; display: flex; justify-content: center; align-items: center; }
+  .btn-new-game { background: #2d5038; color: #4bd879; }
 </style>
 </head>
 <body>
 <div class="tuta-game-wrapper">
-  <div class="tuta-board-section">
-    <div id="xiangqiboard" class="xiangqi-board"></div>
-  </div>
-  
+  <div class="tuta-board-section"><div id="xiangqiboard" class="xiangqi-board"></div></div>
   <div class="tuta-control-section">
     <div class="player-card">
-      <div class="avatar" style="background:#e28743; color:#111;">🤖</div>
+      <div class="avatar" style="background:#e28743;">🤖</div>
       <div class="player-info"><span class="player-name">Tuấn Anh (Bot)</span></div>
-      <!-- BẢNG CHỌN ĐỘ KHÓ -->
       <select class="difficulty-select" id="difficulty">
-        <option value="easy">Nghiệp dư</option>
-        <option value="medium">Bán chuyên</option>
-        <option value="hard" selected>Chuyên nghiệp</option> <!-- Đặt mặc định là khó nhất -->
+        <option value="2">Bán chuyên (Sâu 2)</option>
+        <option value="4" selected>Chuyên nghiệp (Sâu 4)</option>
       </select>
     </div>
-    
-    <div class="status-box red-turn" id="game-status">Lượt: Bạn (Quân Đỏ)</div>
-    
-    <div class="pgn-box">
-      <div class="pgn-header">Kỳ phổ (PGN):</div>
-      <div id="move-history"></div>
-    </div>
-    
+    <div class="status-box" id="game-status">Lượt: Bạn (Đỏ)</div>
+    <div class="pgn-box"><div style="color:#fff; font-weight:bold; border-bottom:1px solid #444; padding-bottom:5px;">Kỳ phổ:</div><div id="move-history"></div></div>
     <div class="action-buttons">
       <button class="btn-action" onclick="undoMove()"><span>⟲</span> Đi lại</button>
-      <button class="btn-action btn-resign" onclick="resetGame()" title="Đầu hàng"><span>⚑</span></button>
-    </div>
-    <button class="btn-new-game" onclick="resetGame()"><span>▶</span> Ván Mới</button>
-    
-    <div class="player-card">
-      <div class="avatar" style="background:#444;">👤</div>
-      <div class="player-info"><span class="player-name">Bạn</span><span class="player-title">Cầm quân Đỏ</span></div>
+      <button class="btn-new-game" onclick="resetGame()"><span>▶</span> Ván Mới</button>
     </div>
   </div>
 </div>
@@ -109,20 +68,9 @@
   const boardEl = document.getElementById('xiangqiboard');
   const statusEl = document.getElementById('game-status');
   const historyEl = document.getElementById('move-history');
-  
-  let pieces = [];
-  let currentTurn = 'red';
-  let selectedPiece = null;
-  let currentValidMoves = [];
-  let moveCount = 1;
-  let gameHistory = []; 
-  let botTimeoutId = null;
+  let pieces = [], currentTurn = 'red', selectedPiece = null, moveCount = 1, gameHistory = [], botTimeoutId = null;
 
-  // Thang điểm đánh giá độ quan trọng của các quân cờ
-  const pieceValues = {
-    '將': 10000, '帥': 10000, '車': 900, '俥': 900, '砲': 450, '炮': 450,
-    '馬': 400, '傌': 400, '象': 200, '相': 200, '士': 200, '仕': 200, '卒': 100, '兵': 100
-  };
+  const pieceValues = { '帥': 10000, '將': 10000, '俥': 900, '車': 900, '炮': 450, '砲': 450, '傌': 400, '馬': 400, '相': 200, '象': 200, '仕': 200, '士': 200, '兵': 100, '卒': 100 };
 
   const initialSetup = [
     { id: 'b_che1', type: '車', color: 'black', x: 0, y: 0 }, { id: 'b_ma1', type: '馬', color: 'black', x: 1, y: 0 }, { id: 'b_tuong1', type: '象', color: 'black', x: 2, y: 0 }, { id: 'b_si1', type: '士', color: 'black', x: 3, y: 0 }, { id: 'b_king', type: '將', color: 'black', x: 4, y: 0 }, { id: 'b_si2', type: '士', color: 'black', x: 5, y: 0 }, { id: 'b_tuong2', type: '象', color: 'black', x: 6, y: 0 }, { id: 'b_ma2', type: '馬', color: 'black', x: 7, y: 0 }, { id: 'b_che2', type: '車', color: 'black', x: 8, y: 0 },
@@ -134,307 +82,136 @@
   ];
 
   function getPercent(x, y) { return { left: 5.55 + (x * (88.9 / 8)), top: 5 + (y * (90 / 9)) }; }
-  function getPieceAt(x, y) { return pieces.find(p => p.x === x && p.y === y && !p.captured); }
+  function getPieceAt(x, y, board = pieces) { return board.find(p => p.x === x && p.y === y && !p.captured); }
 
   function initBoard() {
-    boardEl.innerHTML = '';
+    boardEl.innerHTML = ''; pieces = JSON.parse(JSON.stringify(initialSetup));
     for(let y = 0; y <= 9; y++) {
       for(let x = 0; x <= 8; x++) {
-        let cell = document.createElement('div');
-        cell.className = 'grid-cell';
-        let pos = getPercent(x, y);
-        cell.style.left = `${pos.left}%`; cell.style.top = `${pos.top}%`;
-        cell.onclick = () => handleSquareClick(x, y);
-        boardEl.appendChild(cell);
+        let cell = document.createElement('div'); cell.className = 'grid-cell';
+        let pos = getPercent(x, y); cell.style.left = `${pos.left}%`; cell.style.top = `${pos.top}%`;
+        cell.onclick = () => handleSquareClick(x, y); boardEl.appendChild(cell);
       }
     }
-    pieces = JSON.parse(JSON.stringify(initialSetup));
-    pieces.forEach(p => drawPiece(p));
-    
-    gameHistory = [];
-    saveState();
+    pieces.forEach(p => drawPiece(p)); gameHistory = []; saveState();
   }
 
   function drawPiece(p) {
-    let div = document.createElement('div');
-    div.className = `piece ${p.color}`; div.id = p.id; div.innerText = p.type;
-    let pos = getPercent(p.x, p.y);
-    div.style.left = `${pos.left}%`; div.style.top = `${pos.top}%`;
-    div.onclick = (e) => { e.stopPropagation(); handlePieceClick(p); };
-    boardEl.appendChild(div);
+    let div = document.createElement('div'); div.className = `piece ${p.color}`; div.id = p.id; div.innerText = p.type;
+    let pos = getPercent(p.x, p.y); div.style.left = `${pos.left}%`; div.style.top = `${pos.top}%`;
+    div.onclick = (e) => { e.stopPropagation(); handlePieceClick(p); }; boardEl.appendChild(div);
   }
 
-  function saveState() {
-    gameHistory.push({
-      pieces: JSON.parse(JSON.stringify(pieces)),
-      turn: currentTurn,
-      moveCount: moveCount,
-      pgnHTML: historyEl.innerHTML
-    });
-  }
+  function saveState() { gameHistory.push({ pieces: JSON.parse(JSON.stringify(pieces)), turn: currentTurn, moveCount: moveCount, pgnHTML: historyEl.innerHTML }); }
 
   function undoMove() {
-    if (gameHistory.length <= 1) return; 
-    clearTimeout(botTimeoutId); 
-    if (currentTurn === 'red') {
-      gameHistory.pop(); gameHistory.pop();
-    } else {
-      gameHistory.pop();
-    }
-    let state = gameHistory[gameHistory.length - 1];
-    pieces = JSON.parse(JSON.stringify(state.pieces));
+    if (gameHistory.length <= 1) return; clearTimeout(botTimeoutId);
+    if (currentTurn === 'red') { gameHistory.pop(); gameHistory.pop(); } else { gameHistory.pop(); }
+    let state = gameHistory[gameHistory.length - 1]; pieces = JSON.parse(JSON.stringify(state.pieces));
     currentTurn = state.turn; moveCount = state.moveCount; historyEl.innerHTML = state.pgnHTML;
-    selectedPiece = null; currentValidMoves = []; clearHints();
-    statusEl.innerText = 'Lượt: Bạn (Quân Đỏ)'; statusEl.className = 'status-box red-turn';
-    document.querySelectorAll('.piece').forEach(e => e.remove());
-    pieces.forEach(p => drawPiece(p));
+    selectedPiece = null; clearHints(); document.querySelectorAll('.piece').forEach(e => e.remove());
+    pieces.forEach(p => drawPiece(p)); statusEl.innerText = 'Lượt: Bạn (Đỏ)';
   }
 
-  function getValidMoves(piece) {
-    let moves = [];
-    let {x, y, type, color} = piece;
-    let isRed = color === 'red';
-    let dy = isRed ? -1 : 1;
-
+  function getValidMoves(piece, board = pieces) {
+    let moves = [], {x, y, type, color} = piece, isRed = color === 'red', dy = isRed ? -1 : 1;
     function addIfValid(nx, ny) {
       if(nx<0 || nx>8 || ny<0 || ny>9) return false;
-      let target = getPieceAt(nx, ny);
+      let target = getPieceAt(nx, ny, board);
       if(!target || target.color !== color) moves.push({x: nx, y: ny, target: target});
-      return !target; 
+      return !target;
     }
-
-    if(type === '兵' || type === '卒') {
-      addIfValid(x, y + dy); 
-      if((isRed && y <= 4) || (!isRed && y >= 5)) { addIfValid(x + 1, y); addIfValid(x - 1, y); }
-    }
-    else if(type === '俥' || type === '車') {
-      for(let i=x+1; i<=8; i++) if(!addIfValid(i, y)) break;
-      for(let i=x-1; i>=0; i--) if(!addIfValid(i, y)) break;
-      for(let i=y+1; i<=9; i++) if(!addIfValid(x, i)) break;
-      for(let i=y-1; i>=0; i--) if(!addIfValid(x, i)) break;
-    }
-    else if(type === '炮' || type === '砲') {
-      let dirs = [[1,0],[-1,0],[0,1],[0,-1]];
-      for(let d of dirs) {
-        let jump = false;
-        for(let i=1; i<10; i++) {
-          let nx = x + d[0]*i, ny = y + d[1]*i;
-          if(nx<0||nx>8||ny<0||ny>9) break;
-          let target = getPieceAt(nx, ny);
-          if(!jump) {
-            if(!target) moves.push({x: nx, y: ny, target: null}); else jump = true;
-          } else if(target) {
-            if(target.color !== color) moves.push({x: nx, y: ny, target: target}); break;
-          }
-        }
-      }
-    }
-    else if(type === '傌' || type === '馬') {
-      let knightMoves = [[1,2], [2,1], [2,-1], [1,-2], [-1,-2], [-2,-1], [-2,1], [-1,2]];
-      for(let m of knightMoves) {
-        let nx = x + m[0], ny = y + m[1];
-        let bx = x + (Math.abs(m[0])==2 ? Math.sign(m[0]) : 0); 
-        let by = y + (Math.abs(m[1])==2 ? Math.sign(m[1]) : 0); 
-        if(!getPieceAt(bx, by)) addIfValid(nx, ny);
-      }
-    }
-    else if(type === '相' || type === '象') {
-      let elephantMoves = [[2,2], [2,-2], [-2,2], [-2,-2]];
-      for(let m of elephantMoves) {
-        let nx = x + m[0], ny = y + m[1];
-        if((isRed && ny <= 4) || (!isRed && ny >= 5)) continue; 
-        let bx = x + m[0]/2, by = y + m[1]/2; 
-        if(!getPieceAt(bx, by)) addIfValid(nx, ny);
-      }
-    }
-    else if(type === '仕' || type === '士') {
-      let advisorMoves = [[1,1], [1,-1], [-1,1], [-1,-1]];
-      for(let m of advisorMoves) {
-        let nx = x + m[0], ny = y + m[1];
-        if(nx>=3 && nx<=5 && ((isRed && ny>=7) || (!isRed && ny<=2))) addIfValid(nx, ny);
-      }
-    }
-    else if(type === '帥' || type === '將') {
-      let kingMoves = [[0,1],[0,-1],[1,0],[-1,0]];
-      for(let m of kingMoves) {
-        let nx = x + m[0], ny = y + m[1];
-        if(nx>=3 && nx<=5 && ((isRed && ny>=7) || (!isRed && ny<=2))) addIfValid(nx, ny);
-      }
-    }
+    if(type === '兵' || type === '卒') { addIfValid(x, y + dy); if((isRed && y <= 4) || (!isRed && y >= 5)) { addIfValid(x + 1, y); addIfValid(x - 1, y); } }
+    else if(type === '俥' || type === '車') { for(let i=x+1; i<=8; i++) if(!addIfValid(i, y)) break; for(let i=x-1; i>=0; i--) if(!addIfValid(i, y)) break; for(let i=y+1; i<=9; i++) if(!addIfValid(x, i)) break; for(let i=y-1; i>=0; i--) if(!addIfValid(x, i)) break; }
+    else if(type === '炮' || type === '砲') { let dirs = [[1,0],[-1,0],[0,1],[0,-1]]; for(let d of dirs) { let jump = false; for(let i=1; i<10; i++) { let nx = x + d[0]*i, ny = y + d[1]*i; if(nx<0||nx>8||ny<0||ny>9) break; let target = getPieceAt(nx, ny, board); if(!jump) { if(!target) moves.push({x: nx, y: ny, target: null}); else jump = true; } else if(target) { if(target.color !== color) moves.push({x: nx, y: ny, target: target}); break; } } } }
+    else if(type === '傌' || type === '馬') { [[1,2], [2,1], [2,-1], [1,-2], [-1,-2], [-2,-1], [-2,1], [-1,2]].forEach(m => { let nx = x + m[0], ny = y + m[1], bx = x + (Math.abs(m[0])==2 ? Math.sign(m[0]) : 0), by = y + (Math.abs(m[1])==2 ? Math.sign(m[1]) : 0); if(!getPieceAt(bx, by, board)) addIfValid(nx, ny); }); }
+    else if(type === '相' || type === '象') { [[2,2], [2,-2], [-2,2], [-2,-2]].forEach(m => { let nx = x + m[0], ny = y + m[1]; if((isRed && ny <= 4) || (!isRed && ny >= 5)) return; let bx = x + m[0]/2, by = y + m[1]/2; if(!getPieceAt(bx, by, board)) addIfValid(nx, ny); }); }
+    else if(type === '仕' || type === '士') { [[1,1], [1,-1], [-1,1], [-1,-1]].forEach(m => { let nx = x + m[0], ny = y + m[1]; if(nx>=3 && nx<=5 && ((isRed && ny>=7) || (!isRed && ny<=2))) addIfValid(nx, ny); }); }
+    else if(type === '帥' || type === '將') { [[0,1],[0,-1],[1,0],[-1,0]].forEach(m => { let nx = x + m[0], ny = y + m[1]; if(nx>=3 && nx<=5 && ((isRed && ny>=7) || (!isRed && ny<=2))) addIfValid(nx, ny); }); }
     return moves;
   }
 
   function clearHints() { document.querySelectorAll('.valid-move-hint, .capture-hint').forEach(e => e.remove()); }
+  function showHints(moves) { clearHints(); moves.forEach(m => { let hint = document.createElement('div'); hint.className = m.target ? 'capture-hint' : 'valid-move-hint'; let pos = getPercent(m.x, m.y); hint.style.left = `${pos.left}%`; hint.style.top = `${pos.top}%`; boardEl.appendChild(hint); }); }
 
-  function showHints(moves) {
-    clearHints();
-    moves.forEach(m => {
-      let hint = document.createElement('div');
-      hint.className = m.target ? 'capture-hint' : 'valid-move-hint';
-      let pos = getPercent(m.x, m.y);
-      hint.style.left = `${pos.left}%`; hint.style.top = `${pos.top}%`;
-      boardEl.appendChild(hint);
-    });
+  function handlePieceClick(p) { if (p.captured || currentTurn === 'black') return; if (p.color === currentTurn) { if(selectedPiece) document.getElementById(selectedPiece.id).classList.remove('selected'); selectedPiece = p; document.getElementById(p.id).classList.add('selected'); showHints(getValidMoves(p)); } else if (selectedPiece) { let mv = getValidMoves(selectedPiece).find(m => m.x === p.x && m.y === p.y); if(mv) executeMove(selectedPiece, p.x, p.y, p); } }
+  function handleSquareClick(x, y) { if (selectedPiece && currentTurn === 'red') { let mv = getValidMoves(selectedPiece).find(m => m.x === x && m.y === y); if(mv) executeMove(selectedPiece, x, y, null); } }
+
+  function executeMove(piece, toX, toY, target) {
+    clearHints(); piece.x = toX; piece.y = toY; let div = document.getElementById(piece.id), pos = getPercent(toX, toY); div.style.left = `${pos.left}%`; div.style.top = `${pos.top}%`;
+    if (target) { target.captured = true; document.getElementById(target.id).style.display = 'none'; if(target.type === '將' || target.type === '帥') setTimeout(() => alert(piece.color === 'red' ? 'Thắng!' : 'Thua!'), 300); }
+    document.getElementById(piece.id).classList.remove('selected'); selectedPiece = null;
+    let hLine = document.createElement('div'); hLine.innerText = `[${moveCount}] ${piece.type}${piece.color==='red'?'Đỏ':'Đen'}->(${toX},${toY})`; historyEl.appendChild(hLine); historyEl.scrollTop = historyEl.scrollHeight;
+    currentTurn = currentTurn === 'red' ? 'black' : 'red'; if(currentTurn === 'red') moveCount++; saveState();
+    if(currentTurn === 'black') { statusEl.innerText = 'Bot đang nghĩ...'; botTimeoutId = setTimeout(botPlay, 500); } else statusEl.innerText = 'Lượt: Bạn';
   }
 
-  function handlePieceClick(clickedPiece) {
-    if (clickedPiece.captured || currentTurn === 'black') return;
-
-    if (clickedPiece.color === currentTurn) {
-      if(selectedPiece) document.getElementById(selectedPiece.id).classList.remove('selected');
-      selectedPiece = clickedPiece;
-      document.getElementById(selectedPiece.id).classList.add('selected');
-      currentValidMoves = getValidMoves(selectedPiece);
-      showHints(currentValidMoves);
-    } 
-    else if (selectedPiece && selectedPiece.color !== clickedPiece.color) {
-      let validMove = currentValidMoves.find(m => m.x === clickedPiece.x && m.y === clickedPiece.y);
-      if(validMove) executeMove(selectedPiece, clickedPiece.x, clickedPiece.y, clickedPiece);
-    }
-  }
-
-  function handleSquareClick(x, y) {
-    if (selectedPiece && currentTurn === 'red') {
-      let validMove = currentValidMoves.find(m => m.x === x && m.y === y);
-      if(validMove) executeMove(selectedPiece, x, y, null);
-    }
-  }
-
-  function executeMove(piece, toX, toY, targetPiece) {
-    clearHints();
-    let actionTxt = targetPiece ? `ăn ${targetPiece.type}` : `đến (${toX},${toY})`;
-    let pgn = `[${moveCount}] ${piece.type} ${piece.color==='red'?'Đỏ':'Đen'} ${actionTxt}`;
-    
-    piece.x = toX; piece.y = toY;
-    let div = document.getElementById(piece.id);
-    let pos = getPercent(toX, toY);
-    div.style.left = `${pos.left}%`; div.style.top = `${pos.top}%`;
-
-    if (targetPiece) {
-      targetPiece.captured = true;
-      document.getElementById(targetPiece.id).style.display = 'none';
-      if(targetPiece.type === '將' || targetPiece.type === '帥') {
-        setTimeout(() => alert(`${piece.color === 'red' ? '🎉 BẠN ĐÃ CHIẾN THẮNG!' : '🤖 BOT ĐÃ CHIẾN THẮNG!'}`), 300);
+  // --- AI ALPHA-BETA PRUNING ---
+  function evaluateBoard(board) {
+    let score = 0;
+    board.forEach(p => {
+      if (!p.captured) {
+        let val = pieceValues[p.type] || 0;
+        // Thưởng vị trí trung tâm & áp sát cung
+        if (p.type === '卒' || p.type === '兵') val += (p.color === 'black' ? p.y : 9 - p.y) * 10;
+        score += (p.color === 'black' ? val : -val);
       }
-    }
+    });
+    return score;
+  }
+
+  function minimax(board, depth, alpha, beta, isMaximizing) {
+    if (depth === 0) return evaluateBoard(board);
+    let blackPieces = board.filter(p => p.color === 'black' && !p.captured);
+    let redPieces = board.filter(p => p.color === 'red' && !p.captured);
     
-    document.getElementById(piece.id).classList.remove('selected');
-    selectedPiece = null; currentValidMoves = [];
-
-    let historyLine = document.createElement('div');
-    historyLine.innerText = pgn; historyEl.appendChild(historyLine); historyEl.scrollTop = historyEl.scrollHeight;
-
-    currentTurn = currentTurn === 'red' ? 'black' : 'red';
-    if(currentTurn === 'red') moveCount++; 
-    
-    saveState(); 
-
-    if(currentTurn === 'black') {
-      statusEl.innerText = 'Lượt: Tuấn Anh Bot (Đang nghĩ...)'; statusEl.className = 'status-box black-turn';
-      botTimeoutId = setTimeout(botPlay, 600);
+    if (isMaximizing) {
+      let maxEval = -Infinity;
+      for (let p of blackPieces) {
+        for (let m of getValidMoves(p, board)) {
+          let oldX = p.x, oldY = p.y, target = m.target;
+          p.x = m.x; p.y = m.y; if (target) target.captured = true;
+          let ev = minimax(board, depth - 1, alpha, beta, false);
+          p.x = oldX; p.y = oldY; if (target) target.captured = false;
+          maxEval = Math.max(maxEval, ev); alpha = Math.max(alpha, ev);
+          if (beta <= alpha) break;
+        }
+      }
+      return maxEval;
     } else {
-      statusEl.innerText = 'Lượt: Bạn (Quân Đỏ)'; statusEl.className = 'status-box red-turn';
+      let minEval = Infinity;
+      for (let p of redPieces) {
+        for (let m of getValidMoves(p, board)) {
+          let oldX = p.x, oldY = p.y, target = m.target;
+          p.x = m.x; p.y = m.y; if (target) target.captured = true;
+          let ev = minimax(board, depth - 1, alpha, beta, true);
+          p.x = oldX; p.y = oldY; if (target) target.captured = false;
+          minEval = Math.min(minEval, ev); beta = Math.min(beta, ev);
+          if (beta <= alpha) break;
+        }
+      }
+      return minEval;
     }
   }
 
-  // --- NÂNG CẤP AI THÔNG MINH HƠN (MINIMAX) ---
   function botPlay() {
-    let difficulty = document.getElementById('difficulty').value;
+    let depth = parseInt(document.getElementById('difficulty').value);
+    let bestMove = null, maxEval = -Infinity;
     let blackPieces = pieces.filter(p => p.color === 'black' && !p.captured);
-    let allValidMoves = [];
     
-    // Thu thập toàn bộ nước đi của phe Đen
-    blackPieces.forEach(bp => {
-      let moves = getValidMoves(bp);
-      moves.forEach(m => allValidMoves.push({piece: bp, move: m}));
-    });
-
-    if(allValidMoves.length === 0) return; 
-    let chosenMove = null;
-
-    // Xáo trộn để Bot đi đa dạng hơn
-    allValidMoves.sort(() => 0.5 - Math.random());
-
-    if (difficulty === 'easy') {
-      // Nhắm mắt đi bừa
-      chosenMove = allValidMoves[0];
-    } 
-    else if (difficulty === 'medium') {
-      // Tham ăn nhưng thiển cận (Nhìn 1 bước)
-      let captures = allValidMoves.filter(m => m.move.target);
-      if(captures.length > 0) {
-        captures.sort((a, b) => pieceValues[b.move.target.type] - pieceValues[a.move.target.type]);
-        chosenMove = captures[0];
-      } else {
-        chosenMove = allValidMoves[0];
-      }
-    } 
-    else if (difficulty === 'hard') {
-      // CHUYÊN NGHIỆP: Áp dụng Minimax (Nhìn xa 2 bước để chặn tự sát)
-      let bestScore = -Infinity;
-      
-      for(let m of allValidMoves) {
-        let bp = m.piece;
-        let target = m.move.target;
-        
-        // --- BƯỚC 1: BOT ĐI THỬ ---
-        let origX = bp.x, origY = bp.y;
-        bp.x = m.move.x; bp.y = m.move.y;
-        if(target) target.captured = true;
-
-        // Tính lợi ích đạt được ở bước này
-        let currentMoveScore = target ? pieceValues[target.type] : 0;
-        
-        // Thưởng vị trí (ép Tốt qua sông, chiếm trung lộ)
-        if (bp.type === '卒') {
-          if (bp.y > origY) currentMoveScore += 15;
-          if (bp.x >= 3 && bp.x <= 5) currentMoveScore += 10;
-        }
-        if (bp.x === 4) currentMoveScore += 5;
-
-        // --- BƯỚC 2: MÔ PHỎNG NGƯỜI CHƠI ĐÁP TRẢ (TÌM NƯỚC ĐAU NHẤT) ---
-        let maxRedRetaliation = 0;
-        let redPieces = pieces.filter(p => p.color === 'red' && !p.captured);
-        
-        for(let rp of redPieces) {
-          let redMoves = getValidMoves(rp);
-          for(let rm of redMoves) {
-            if(rm.target) {
-              // Nếu người chơi có thể ăn lại quân của Bot
-              let loss = pieceValues[rm.target.type];
-              if(loss > maxRedRetaliation) {
-                maxRedRetaliation = loss;
-              }
-            }
-          }
-        }
-
-        // --- BƯỚC 3: HOÀN TÁC TRẠNG THÁI ---
-        bp.x = origX; bp.y = origY;
-        if(target) target.captured = false;
-
-        // TÍNH ĐIỂM THỰC SỰ = LỢI ÍCH - THIỆT HẠI
-        let netScore = currentMoveScore - maxRedRetaliation;
-
-        if(netScore > bestScore) {
-          bestScore = netScore;
-          chosenMove = m;
-        }
+    for (let p of blackPieces) {
+      for (let m of getValidMoves(p)) {
+        let oldX = p.x, oldY = p.y, target = m.target;
+        p.x = m.x; p.y = m.y; if (target) target.captured = true;
+        let ev = minimax(pieces, depth - 1, -Infinity, Infinity, false);
+        p.x = oldX; p.y = oldY; if (target) target.captured = false;
+        if (ev > maxEval) { maxEval = ev; bestMove = { p, m }; }
       }
     }
-
-    if (chosenMove) {
-      executeMove(chosenMove.piece, chosenMove.move.x, chosenMove.move.y, chosenMove.move.target);
-    }
+    if (bestMove) executeMove(bestMove.p, bestMove.m.x, bestMove.m.y, bestMove.m.target);
   }
 
-  function resetGame() {
-    clearTimeout(botTimeoutId);
-    clearHints(); currentTurn = 'red'; selectedPiece = null; currentValidMoves = []; moveCount = 1;
-    historyEl.innerHTML = ''; statusEl.innerText = 'Lượt: Bạn (Quân Đỏ)'; statusEl.className = 'status-box red-turn';
-    initBoard();
-  }
-
+  function resetGame() { clearTimeout(botTimeoutId); initBoard(); statusEl.innerText = 'Lượt: Bạn'; moveCount = 1; historyEl.innerHTML = ''; }
   window.onload = initBoard;
 </script>
 </body>
